@@ -19,7 +19,9 @@ window.NC_CONFIG = {
     search: 'startdatum >= "0d" AND startdatum <= "0d"',
     refreshMinutes: 15,
 
-    title: "Vandaag bij ons",
+    lang: "nl",          // "nl" of "en" — te overschrijven met ?lang=en
+
+    title: { nl: "Vandaag bij ons", en: "Today with us" },
 
     /* Schermvullende foto's (plaats ze in ./slides/). Niet-bestaande
        bestanden worden automatisch overgeslagen. */

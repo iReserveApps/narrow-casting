@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Getting started — i-Reserve Narrow Casting</title>
+    <!--suppress CssNoGenericFontName -->
+    <style>
+        :root{
+            --ir-primary:#67b516; --ir-primary-700:#356309; --ir-accent:#1667b5;
+            --ink:#333; --muted:#777; --line:#e7e7e7; --tint:#f0f7e7; --bg:#f4f4f4;
+            --font:"Inter","Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+        }
+        *{box-sizing:border-box;}
+        body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.6;}
+        .topbar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;}
+        .topbar .inner{max-width:860px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:16px;}
+        .topbar img{height:40px;}
+        .topbar .langswitch{margin-left:auto;display:flex;gap:4px;}
+        .topbar .langswitch a{font-size:13px;font-weight:600;text-decoration:none;color:var(--muted);
+            border:1px solid var(--line);background:#fff;padding:5px 12px;border-radius:999px;}
+        .topbar .langswitch a.active{background:var(--ir-primary);color:#fff;border-color:var(--ir-primary);}
+        .topbar .back{font-size:14px;color:var(--ir-primary-700);text-decoration:none;font-weight:600;margin-left:16px;}
+        .topbar .back:hover{text-decoration:underline;}
+        .wrap{max-width:860px;margin:0 auto;padding:32px 24px 80px;}
+        h1{font-size:30px;color:var(--ir-primary-700);margin:.2em 0 .1em;}
+        .sub{color:var(--muted);margin-top:0;font-size:17px;}
+        h2{font-size:22px;color:var(--ir-primary-700);margin-top:2em;padding-bottom:6px;border-bottom:2px solid var(--tint);}
+        a{color:var(--ir-primary-700);}
+        code{background:var(--tint);padding:2px 6px;border-radius:5px;font-size:.92em;font-family:ui-monospace,Menlo,Consolas,monospace;}
+        pre{background:#1e2a16;color:#e8f3d8;padding:16px 18px;border-radius:10px;overflow-x:auto;font-size:14px;
+            font-family:ui-monospace,Menlo,Consolas,monospace;line-height:1.5;}
+        pre code{background:none;padding:0;color:inherit;}
+        table{border-collapse:collapse;width:100%;margin:1em 0;font-size:15px;}
+        th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top;}
+        th{background:var(--tint);}
+        .callout{border-left:5px solid var(--ir-accent);background:#eef4fb;padding:12px 16px;border-radius:0 10px 10px 0;margin:1.2em 0;}
+        .callout.tip{border-left-color:var(--ir-primary);background:var(--tint);}
+        ol li,ul li{margin:.35em 0;}
+        footer{max-width:860px;margin:0 auto;padding:24px;color:var(--muted);font-size:14px;}
+    </style>
+</head>
+<body>
+    <div class="topbar"><div class="inner">
+        <img src="../shared/i-reserve-logo.png" alt="i-Reserve"/>
+        <div class="langswitch">
+            <a href="aan-de-slag.html">NL</a>
+            <a class="active" href="aan-de-slag.en.html">EN</a>
+        </div>
+        <a class="back" href="../index.html?lang=en">← Back to overview</a>
+    </div></div>
+
+    <div class="wrap">
+        <h1>Getting started</h1>
+        <p class="sub">From example to a working narrow-casting screen in a few steps.</p>
+
+        <h2>Try it right away (demo mode)</h2>
+        <p>The examples work <strong>immediately</strong>, without an i-Reserve account: while <code>baseUrl</code> in
+        <code>config.js</code> is still set to the placeholder <code>JOUWOMGEVING</code>, the SDK automatically shows
+        realistic demo data (with times around "now"). Open an example and you see a working screen live —
+        the bottom shows <code>DEMO</code>.</p>
+        <div class="callout tip">Want to reproduce the real network/CORS path? Start the bundled mini-server
+        (no dependencies): <code>node demo/server.js</code> and open <code>http://localhost:8080/</code>.</div>
+
+        <h2>Connect an example to your environment</h2>
+        <ol>
+            <li>First arrange access: create a read-only API user and allow CORS in the admin panel —
+                see <a href="authenticatie-en-cors.en.html">Authentication &amp; CORS</a>.</li>
+            <li>Pick an example and open its <code>config.js</code>. Fill in:
+                <ul>
+                    <li><code>baseUrl</code> → <code>https://JOUWOMGEVING.i-reserve.net</code></li>
+                    <li><code>auth</code> → username + password of the API user</li>
+                    <li><code>search</code> → the filter (which products / which period)</li>
+                    <li>optionally <code>columns</code> and <code>columnMap</code> if your fields are named differently</li>
+                </ul>
+            </li>
+            <li>Open that example's <code>index.html</code> on the screen. As soon as a real <code>baseUrl</code>
+                is filled in, the SDK automatically switches from demo to live data.</li>
+        </ol>
+
+        <h2>The examples</h2>
+        <table>
+            <tr><th>#</th><th>Folder</th><th>Pattern</th></tr>
+            <tr><td>01</td><td><code>examples/01-dagrooster-tabel</code></td><td>Table with today's activities, pagination + optional photo slideshow</td></tr>
+            <tr><td>02</td><td><code>examples/02-kamerbordjes</code></td><td>Coloured room cards with "in use" filtering</td></tr>
+            <tr><td>03</td><td><code>examples/03-fullscreen-slideshow</code></td><td>Full-screen photos with a bookings caption</td></tr>
+            <tr><td>04</td><td><code>examples/04-events-grid</code></td><td>Event cards with time and free places</td></tr>
+        </table>
+
+        <h2>Customise the styling</h2>
+        <p>All colours, shapes and the font are variables at the top of <code>shared/ireserve.css</code>
+        (<code>:root { --ir-primary: … }</code>). Adjust those for the i-Reserve or client styling; the whole SDK
+        follows automatically. Replace <code>shared/i-reserve-logo.png</code> with the desired logo.</p>
+
+        <h2>Shipping a single example</h2>
+        <p>To hand a single example to a client, copy <strong>the example folder and the <code>shared/</code> folder</strong>
+        together (the examples reference <code>../../shared/</code> relatively). Keep the relative folder structure intact.</p>
+
+        <div class="callout">
+            <strong>Security:</strong> with narrow casting the API credentials are readable in the browser. Always use
+            a read-only API user with access to only the required products. See the
+            <a href="authenticatie-en-cors.en.html#checklist">security checklist</a>.
+        </div>
+    </div>
+
+    <footer>i-Reserve Narrow Casting SDK · <a href="../index.html?lang=en">overview</a> · <a href="authenticatie-en-cors.en.html">Authentication &amp; CORS</a></footer>
+</body>
+</html>

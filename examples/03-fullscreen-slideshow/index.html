@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>i-Reserve NC — Slideshow</title>
     <link rel="stylesheet" href="../../shared/ireserve.css"/>
+    <!--suppress CssUnusedSymbol -->
     <style>
         body { background: #000; }
         .stage { position: fixed; inset: 0; overflow: hidden; }
@@ -59,12 +60,15 @@
     <div class="nc-status" id="nc-status" hidden></div>
 
     <script src="../../shared/ireserve.js"></script>
+    <script src="../../shared/i18n.js"></script>
     <script src="../../shared/demo-data.js"></script>
     <script src="config.js"></script>
     <script>
     (function () {
         var cfg = window.NC_CONFIG, map = cfg.columnMap;
-        document.getElementById("nc-title").textContent = cfg.title || "";
+        iReserve.initLang(cfg);
+        iReserve.applyI18n();
+        document.getElementById("nc-title").textContent = iReserve.pick(cfg.title) || "";
         document.getElementById("nc-date").textContent  = iReserve.formatLongDate();
 
         // ---- Foto-carousel ----
@@ -99,7 +103,7 @@
         function showCaption() {
             var t = document.getElementById("ev-title");
             var m = document.getElementById("ev-meta");
-            if (!bookings.length) { t.textContent = "Geen activiteiten vandaag"; m.textContent = ""; return; }
+            if (!bookings.length) { t.textContent = iReserve.t("ui.noToday"); m.textContent = ""; return; }
             capIdx = capIdx % bookings.length;
             var b = bookings[capIdx];
             t.textContent = b[map.title] || "";

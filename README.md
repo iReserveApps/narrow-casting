@@ -24,6 +24,19 @@ node demo/server.js
 Zodra je in `config.js` een echte `baseUrl` invult, schakelt de SDK automatisch over
 naar de live API.
 
+## Talen (NL / EN)
+
+Alle voorbeelden zijn tweetalig (Nederlands + Engels). De taal wordt bepaald door:
+1. `?lang=en` (of `?lang=nl`) in de URL — handig om te demonstreren;
+2. anders de `lang`-instelling in `config.js`;
+3. anders standaard `nl`.
+
+Op de overzichtspagina staat een **NL/EN-schakelaar**. UI-teksten, datums en de
+demo-inhoud schakelen mee. Vertalingen staan in `shared/i18n.js` — een nieuwe taal
+toevoegen = één blok bijplaatsen. Statische teksten gebruiken `data-i18n="..."`,
+dynamische teksten `iReserve.t("...")`. Titels in `config.js` mogen een object zijn:
+`title: { nl: "...", en: "..." }`.
+
 ## Snelstart
 
 1. Open `index.html` (de overzichtspagina) in een browser en bekijk de voorbeelden.

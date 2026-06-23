@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Authentication &amp; CORS — i-Reserve Narrow Casting</title>
+    <!--suppress CssNoGenericFontName -->
+    <style>
+        :root{
+            --ir-primary:#67b516; --ir-primary-700:#356309; --ir-accent:#1667b5;
+            --ink:#333; --muted:#777; --line:#e7e7e7; --tint:#f0f7e7; --bg:#f4f4f4;
+            --font:"Inter","Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+        }
+        *{box-sizing:border-box;}
+        body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.6;}
+        .topbar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;}
+        .topbar .inner{max-width:860px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:16px;}
+        .topbar img{height:40px;}
+        .topbar .langswitch{margin-left:auto;display:flex;gap:4px;}
+        .topbar .langswitch a{font-size:13px;font-weight:600;text-decoration:none;color:var(--muted);
+            border:1px solid var(--line);background:#fff;padding:5px 12px;border-radius:999px;}
+        .topbar .langswitch a.active{background:var(--ir-primary);color:#fff;border-color:var(--ir-primary);}
+        .topbar .back{font-size:14px;color:var(--ir-primary-700);text-decoration:none;font-weight:600;margin-left:16px;}
+        .topbar .back:hover{text-decoration:underline;}
+        .wrap{max-width:860px;margin:0 auto;padding:32px 24px 80px;}
+        h1{font-size:30px;color:var(--ir-primary-700);margin:.2em 0 .1em;}
+        .sub{color:var(--muted);margin-top:0;font-size:17px;}
+        h2{font-size:22px;color:var(--ir-primary-700);margin-top:2em;padding-bottom:6px;border-bottom:2px solid var(--tint);}
+        h3{font-size:18px;margin-top:1.6em;}
+        a{color:var(--ir-primary-700);}
+        code{background:var(--tint);padding:2px 6px;border-radius:5px;font-size:.92em;font-family:ui-monospace,Menlo,Consolas,monospace;}
+        pre{background:#1e2a16;color:#e8f3d8;padding:16px 18px;border-radius:10px;overflow-x:auto;font-size:14px;
+            font-family:ui-monospace,Menlo,Consolas,monospace;line-height:1.5;}
+        pre code{background:none;padding:0;color:inherit;}
+        table{border-collapse:collapse;width:100%;margin:1em 0;font-size:15px;}
+        th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top;}
+        th{background:var(--tint);}
+        .callout{border-left:5px solid var(--ir-accent);background:#eef4fb;padding:12px 16px;border-radius:0 10px 10px 0;margin:1.2em 0;}
+        .callout.warn{border-left-color:#e0a800;background:#fdf6e3;}
+        .callout.tip{border-left-color:var(--ir-primary);background:var(--tint);}
+        ul.checklist{list-style:none;padding-left:0;}
+        ul.checklist li{padding-left:28px;position:relative;margin:.4em 0;}
+        ul.checklist li::before{content:"☐";position:absolute;left:0;color:var(--ir-primary);font-weight:700;}
+        .toc{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 20px;margin:1.5em 0;}
+        .toc strong{display:block;margin-bottom:6px;color:var(--ir-primary-700);}
+        .toc ol{margin:0;padding-left:20px;}
+        footer{max-width:860px;margin:0 auto;padding:24px;color:var(--muted);font-size:14px;}
+    </style>
+</head>
+<body>
+    <div class="topbar"><div class="inner">
+        <img src="../shared/i-reserve-logo.png" alt="i-Reserve"/>
+        <div class="langswitch">
+            <a href="authenticatie-en-cors.html">NL</a>
+            <a class="active" href="authenticatie-en-cors.en.html">EN</a>
+        </div>
+        <a class="back" href="../index.html?lang=en">← Back to overview</a>
+    </div></div>
+
+    <div class="wrap">
+        <h1>Setting up authentication &amp; CORS</h1>
+        <p class="sub">How to connect a narrow-casting screen to the i-Reserve REST API.</p>
+
+        <div class="toc">
+            <strong>On this page</strong>
+            <ol>
+                <li><a href="#how">How the connection works</a></li>
+                <li><a href="#user">Create an API user</a></li>
+                <li><a href="#auth">Authentication in the HTML</a></li>
+                <li><a href="#cors">Allow CORS in the admin panel ⭐</a></li>
+                <li><a href="#filter">The filter (search DSL)</a></li>
+                <li><a href="#test">Testing that it works</a></li>
+                <li><a href="#server">Alternative: mini web server</a></li>
+                <li><a href="#checklist">Security checklist</a></li>
+            </ol>
+        </div>
+
+        <h2 id="how">1. How the connection works</h2>
+        <p>Each example fetches data with a GET request to the REST API:</p>
+        <pre><code>GET https://JOUWOMGEVING.i-reserve.net/api/rest/booking/filter?columns=...&amp;search=...
+Authorization: Basic &lt;base64(user:password)&gt;</code></pre>
+        <ul>
+            <li><code>booking/filter</code> → reservations/bookings (day schedule, room signs, slideshow).</li>
+            <li><code>event/filter</code> → public events with availability (events grid).</li>
+        </ul>
+        <p>The <code>columns</code> parameter determines which fields are returned; the <code>search</code> parameter is the filter (see §5).</p>
+
+        <h2 id="user">2. Create an API user (read-only!)</h2>
+        <div class="callout warn">
+            <strong>⚠️ Important:</strong> with narrow casting the login details are readable in the HTML
+            (the browser sends them along). So <strong>never</strong> use an administrator account, but
+            a dedicated user with <strong>read-only rights</strong> on exactly the products the screen needs.
+        </div>
+        <ol>
+            <li>Log in to the i-Reserve <strong>admin panel</strong> as an administrator.</li>
+            <li>Go to <strong>Users / Staff</strong> and create a new user, e.g. <code>API_signage</code>.</li>
+            <li>Give this user a <strong>role/permission profile with read-only rights</strong> on bookings/events. No write, delete or admin rights.</li>
+            <li>Where possible, restrict access to <strong>only the relevant products/rooms</strong>.</li>
+            <li>Choose a strong, unique password and note it. You will enter it in <code>config.js</code>.</li>
+        </ol>
+        <div class="callout tip">💡 Optionally create a separate user per location/screen group, so you can revoke credentials per screen without affecting the rest.</div>
+
+        <h2 id="auth">3. Authentication in the HTML (Basic Auth)</h2>
+        <p>The SDK handles this automatically. You only fill in your details in <code>config.js</code>:</p>
+        <pre><code>auth: { username: "API_signage", password: "YOUR_PASSWORD" },</code></pre>
+        <p>The helper (<code>shared/ireserve.js</code>) builds the header from this:</p>
+        <pre><code>"Authorization": "Basic " + btoa(username + ":" + password)</code></pre>
+        <p>If an endpoint needs no authentication (some <strong>public</strong> event endpoints), set <code>auth: null</code>.</p>
+
+        <h2 id="cors">4. Allow CORS in the admin panel ⭐</h2>
+        <p>This is the step most often forgotten. The browser blocks requests to a different domain than the page came from by default. A narrow-casting page usually runs as a file (<code>file://</code>) or on a local box — a <strong>different origin</strong> than <code>https://JOUWOMGEVING.i-reserve.net</code>. So the API must explicitly allow this origin to make requests (CORS = Cross-Origin Resource Sharing).</p>
+
+        <h3>Which origin should you allow?</h3>
+        <table>
+            <tr><th>How does the screen run?</th><th>Origin to whitelist</th></tr>
+            <tr><td>As a loose file (<code>file://.../index.html</code>)</td><td><code>null</code></td></tr>
+            <tr><td>From a local web server</td><td><code>http://localhost</code> or <code>http://&lt;ip-address&gt;</code></td></tr>
+            <tr><td>Hosted on a (sub)domain</td><td><code>https://signage.yourdomain.com</code></td></tr>
+        </table>
+        <div class="callout">With <code>file://</code> the browser literally sends the origin <code>null</code>. So that must be in the whitelist. If that's not possible, host the page via a mini web server (see §7).</div>
+
+        <h3>Where in the admin panel</h3>
+        <ol>
+            <li>Open the <strong>admin panel</strong> → <strong>Settings</strong> → <strong>API / Integrations</strong> (or <strong>Security / CORS</strong> — the exact name may differ per version).</li>
+            <li>Find the setting <strong>"Allowed origins" / "CORS allowed origins"</strong>.</li>
+            <li>Add the origin(s) from the table above, one per line, for example:
+                <pre><code>null
+https://signage.yourdomain.com</code></pre>
+            </li>
+            <li>Save. The API then returns the correct <code>Access-Control-Allow-Origin</code> header.</li>
+        </ol>
+        <div class="callout warn">Avoid <code>*</code> (allow everything) in production. Whitelist only the origins you actually use. <code>*</code> also does not work together with Basic Auth credentials in some browsers.</div>
+
+        <h2 id="filter">5. The filter (search DSL)</h2>
+        <p>The <code>search</code> parameter uses relative dates and simple logic:</p>
+        <table>
+            <tr><th>Example</th><th>Meaning</th></tr>
+            <tr><td><code>startdatum &gt;= "0d" AND startdatum &lt;= "0d"</code></td><td>today only</td></tr>
+            <tr><td><code>startdatum &gt;= "0d" AND startdatum &lt;= "7d"</code></td><td>today through 7 days ahead</td></tr>
+            <tr><td><code>startdatum &gt;= "-1d"</code></td><td>from yesterday</td></tr>
+            <tr><td><code>... AND product IN (101,102,103)</code></td><td>limit to these product IDs</td></tr>
+        </table>
+        <p><code>"0d"</code> = today, <code>"7d"</code> = in 7 days, <code>"-1d"</code> = yesterday. Combine with <code>AND</code> / <code>OR</code>. You find the product IDs in the admin panel on the relevant product/room.</p>
+        <p>The <code>columns</code> parameter determines the fields in the response, for example <code>OBJ_TXT_CUSTOM01,RES_CUSTOM02,RES_FROMTIME,RES_TILTIME</code>.</p>
+
+        <h2 id="test">6. Testing that it works</h2>
+        <p>First test outside the browser with <code>curl</code> (no CORS restriction, so purely the auth/filter check):</p>
+        <pre><code>curl -u "API_signage:YOUR_PASSWORD" \
+  'https://JOUWOMGEVING.i-reserve.net/api/rest/booking/filter?columns=RES_CUSTOM02,RES_FROMTIME,RES_TILTIME&amp;search=startdatum%20%3E%3D%20%220d%22'</code></pre>
+        <ul>
+            <li><strong>JSON returned</strong> → auth and filter are fine. Then open the screen in the browser.</li>
+            <li><strong>401 Unauthorized</strong> → username/password or rights are wrong (§2).</li>
+            <li><strong>Empty in the browser but data with curl</strong> → almost certainly CORS (§4). Open the DevTools console (F12); a CORS message confirms it.</li>
+        </ul>
+        <p>The bottom-left of every screen shows a status line with the latest fetch status/error.</p>
+
+        <h2 id="server">7. Alternative: host via a mini web server</h2>
+        <p>If you can't whitelist origin <code>null</code>, run the page via a local web server. Then you have a clean <code>http://localhost</code> origin:</p>
+        <pre><code># in the example's folder
+python3 -m http.server 8080
+# then open http://localhost:8080 on the screen</code></pre>
+        <p>Then whitelist <code>http://localhost:8080</code> (or the IP) in §4. The SDK also ships <code>demo/server.js</code> (<code>node demo/server.js</code>) which serves the repo and a mock API.</p>
+
+        <h2 id="checklist">8. Security checklist</h2>
+        <ul class="checklist">
+            <li>Dedicated API user, <strong>read-only</strong>, limited to the right products.</li>
+            <li>Strong, unique password; rotate periodically.</li>
+            <li>Only the needed origins in the CORS whitelist (no <code>*</code>).</li>
+            <li>No admin account in <code>config.js</code>.</li>
+            <li>When in doubt: put your own reverse proxy in between that adds the credentials server-side, so they are not in the HTML.</li>
+        </ul>
+    </div>
+
+    <footer>i-Reserve Narrow Casting SDK · <a href="../index.html?lang=en">overview</a> · <a href="aan-de-slag.en.html">Getting started</a></footer>
+</body>
+</html>

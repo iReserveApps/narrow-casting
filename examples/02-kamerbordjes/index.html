@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>i-Reserve NC — Kamerbordjes</title>
     <link rel="stylesheet" href="../../shared/ireserve.css"/>
+    <!--suppress CssUnusedSymbol -->
     <style>
         .nc-rooms {
             flex: 1 1 auto;
@@ -35,9 +36,8 @@
         .room .room-activity { font-size: 2.6vh; font-weight: 600; margin-top: 1vh; }
         .room .room-time { font-variant-numeric: tabular-nums; opacity: .9; }
 
-        /* "Nu bezig" badge */
-        .room.is-busy::after {
-            content: "NU BEZIG";
+        /* "Nu bezig" badge (tekst komt uit i18n, via een element) */
+        .room .now-badge {
             position: absolute; top: 2vh; right: 2vw;
             background: var(--ir-accent); color: #fff;
             font-size: 1.5vh; font-weight: 700; letter-spacing: 1px;
@@ -60,19 +60,22 @@
         </main>
 
         <footer class="nc-footer">
-            <span>Powered by i-Reserve</span>
+            <span data-i18n="ui.poweredBy">Powered by i-Reserve</span>
         </footer>
     </div>
 
     <div class="nc-status" id="nc-status" hidden></div>
 
     <script src="../../shared/ireserve.js"></script>
+    <script src="../../shared/i18n.js"></script>
     <script src="../../shared/demo-data.js"></script>
     <script src="config.js"></script>
     <script>
     (function () {
         var cfg = window.NC_CONFIG, map = cfg.columnMap;
-        document.getElementById("nc-title").textContent = cfg.title || "";
+        iReserve.initLang(cfg);
+        iReserve.applyI18n();
+        document.getElementById("nc-title").textContent = iReserve.pick(cfg.title) || "";
         document.getElementById("nc-date").textContent  = iReserve.formatLongDate();
 
         iReserve.poll(cfg, render);
@@ -85,7 +88,7 @@
         function render(rows) {
             lastRows = rows || [];
             var roomDefs = cfg.rooms && cfg.rooms.length ? cfg.rooms : deriveRooms(lastRows);
-            var html = roomDefs.map(function (def) {
+            document.getElementById("nc-rooms").innerHTML = roomDefs.map(function (def) {
                 var events = lastRows.filter(function (r) {
                     return String(r[map.room]) === def.match;
                 }).sort(byTime);
@@ -100,21 +103,23 @@
                 if (current) {
                     return card(def, "is-busy",
                         '<div class="room-activity">' + iReserve.esc(current[map.activity]) + '</div>' +
-                        '<div class="room-time">tot ' + iReserve.esc(iReserve.shortTime(current[map.til])) + '</div>');
+                        '<div class="room-time">' + iReserve.esc(iReserve.t("ui.untilTime", { t: iReserve.shortTime(current[map.til]) })) + '</div>');
                 }
                 if (next) {
                     return card(def, "",
                         '<div class="room-activity">' + iReserve.esc(next[map.activity]) + '</div>' +
-                        '<div class="room-time">vanaf ' + iReserve.esc(iReserve.shortTime(next[map.from])) + '</div>');
+                        '<div class="room-time">' + iReserve.esc(iReserve.t("ui.fromTime", { t: iReserve.shortTime(next[map.from]) })) + '</div>');
                 }
-                return card(def, "is-free", '<div class="room-activity">Beschikbaar</div>');
+                return card(def, "is-free", '<div class="room-activity">' + iReserve.t("ui.available") + '</div>');
             }).join("");
-            document.getElementById("nc-rooms").innerHTML = html;
         }
 
         function card(def, cls, inner) {
+            var badge = cls.indexOf("is-busy") >= 0
+                ? '<span class="now-badge">' + iReserve.t("ui.now") + '</span>' : '';
             return '<div class="room ' + cls + '" style="--c:' + (def.color || 'var(--ir-primary)') + '">' +
-                '<div class="room-name">' + iReserve.esc(def.label || def.match) + '</div>' +
+                badge +
+                '<div class="room-name">' + iReserve.esc(iReserve.pick(def.label) || def.match) + '</div>' +
                 '<div class="room-state">' + inner + '</div>' +
             '</div>';
         }
@@ -122,11 +127,15 @@
         function byTime(a, b) {
             return iReserve.shortTime(a[map.from]).localeCompare(iReserve.shortTime(b[map.from]));
         }
+        var PALETTE = ["#ea72ad", "#3ea992", "#7161a8", "#ea7373", "#72bfd5", "#67b516"];
         function deriveRooms(rows) {
             var seen = {}, out = [];
             rows.forEach(function (r) {
                 var name = r[map.room];
-                if (name && !seen[name]) { seen[name] = 1; out.push({ match: name, label: name }); }
+                if (name && !seen[name]) {
+                    seen[name] = 1;
+                    out.push({ match: name, label: name, color: PALETTE[out.length % PALETTE.length] });
+                }
             });
             return out;
         }

@@ -35,8 +35,12 @@ window.NC_CONFIG = {
 
     refreshMinutes: 15,        // hoe vaak nieuwe data ophalen
 
+    /* --- Taal --------------------------------------------------------
+       "nl" of "en". Te overschrijven met ?lang=en in de URL. */
+    lang:         "nl",
+
     /* --- Weergave ----------------------------------------------------- */
-    title:        "Programma van vandaag",
+    title:        { nl: "Programma van vandaag", en: "Today's programme" },
     rowsPerPage:  6,           // aantal regels per pagina (slide)
     pageSeconds:  10,          // seconden dat een tabelpagina blijft staan
 

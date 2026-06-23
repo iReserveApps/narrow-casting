@@ -13,6 +13,54 @@
 (function (global) {
     "use strict";
 
+    /* =================================================================
+       Taal (i18n)
+       ----------------------------------------------------------------- */
+    var IR_LANG = "nl";                         // actieve taal
+    function dict() {                           // woordenboek van actieve taal
+        var all = global.IR_I18N || {};
+        return all[IR_LANG] || all.nl || {};
+    }
+    /* Bepaalt de taal: ?lang=xx in URL > cfg.lang > "nl". */
+    function initLang(cfg) {
+        var fromUrl = null;
+        try { fromUrl = new URLSearchParams(global.location.search).get("lang"); } catch (e) {}
+        var lang = (fromUrl || (cfg && cfg.lang) || "nl").toLowerCase().slice(0, 2);
+        if (global.IR_I18N && global.IR_I18N[lang]) IR_LANG = lang;
+        return IR_LANG;
+    }
+    function getLang() { return IR_LANG; }
+
+    /* Vertaal een sleutel ("ui.page") met optionele plaatshouders {n}, {t}… */
+    function t(key, params) {
+        var node = dict();
+        key.split(".").forEach(function (k) { node = (node && node[k] !== undefined) ? node[k] : undefined; });
+        var str = (node === undefined) ? key : String(node);
+        if (params) str = str.replace(/\{(\w+)}/g, function (m, p) {
+            return params[p] !== undefined ? params[p] : m;
+        });
+        return str;
+    }
+    /* Kies de waarde voor de actieve taal uit een string of {nl,en}-object. */
+    function pick(value) {
+        if (value && typeof value === "object") return value[IR_LANG] || value.nl || value[Object.keys(value)[0]] || "";
+        return value || "";
+    }
+    /* Meervoud: kies enkelvoud/meervoud op basis van n. */
+    function plural(n, oneKey, otherKey) { return t(n === 1 ? oneKey : otherKey); }
+
+    /* Vul alle elementen met data-i18n="ui.x" met de vertaalde tekst.
+       data-i18n-html gebruikt innerHTML (voor strings met opmaak). */
+    function applyI18n(root) {
+        root = root || document;
+        root.querySelectorAll("[data-i18n]").forEach(function (el) {
+            el.textContent = t(el.getAttribute("data-i18n"));
+        });
+        root.querySelectorAll("[data-i18n-html]").forEach(function (el) {
+            el.innerHTML = t(el.getAttribute("data-i18n-html"));
+        });
+    }
+
     /* ---- URL opbouwen op basis van de config -------------------------- */
     function buildUrl(cfg) {
         var base = (cfg.baseUrl || "").replace(/\/+$/, "");
@@ -52,7 +100,11 @@
         return cfg.demo === true || /JOUWOMGEVING/i.test(cfg.baseUrl || "");
     }
     function demoRows(cfg) {
-        var d = global.IR_DEMO || { bookings: [], events: [] };
+        var src = global.IR_DEMO;
+        // IR_DEMO mag een builder-functie zijn (taalafhankelijk) of een vast object.
+        var d = (typeof src === "function") ? src(IR_LANG)
+              : (src && typeof src.build === "function") ? src.build(IR_LANG)
+              : (src || { bookings: [], events: [] });
         var isEvent = /event/i.test(cfg.endpoint || "");
         return isEvent ? (d.events || []) : (d.bookings || []);
     }
@@ -64,7 +116,6 @@
             /* Haalt de boekingen op. Geeft altijd een array terug. */
             fetchBookings: function () {
                 if (isDemo(cfg)) {
-                    setStatus("DEMO-data (vul baseUrl in voor live data)", "ok");
                     return Promise.resolve(demoRows(cfg));
                 }
 
@@ -94,15 +145,15 @@
         var client = createClient(cfg);
         var minutes = cfg.refreshMinutes || 15;
 
-        var demoTag = isDemo(cfg) ? " · DEMO" : "";
+        var demoTag = isDemo(cfg) ? " · " + t("status.demo") : "";
         function tick() {
             client.fetchBookings()
                 .then(function (rows) {
-                    setStatus("Bijgewerkt: " + formatClock(new Date()) + " — " + rows.length + " items" + demoTag, "ok");
+                    setStatus(t("status.updated") + ": " + formatClock(new Date()) + " — " + rows.length + " " + t("status.items") + demoTag, "ok");
                     onData(rows);
                 })
                 .catch(function (err) {
-                    setStatus("Fout bij ophalen: " + err.message, "error");
+                    setStatus(t("status.error") + ": " + err.message, "error");
                     if (onError) onError(err);
                 })
                 .then(function () {
@@ -112,13 +163,13 @@
         tick();
     }
 
-    /* ---- Datum-/tijdhelpers ------------------------------------------- */
-    var DAYS_NL   = ["zondag","maandag","dinsdag","woensdag","donderdag","vrijdag","zaterdag"];
-    var MONTHS_NL = ["januari","februari","maart","april","mei","juni","juli","augustus","september","oktober","november","december"];
-
+    /* ---- Datum-/tijdhelpers (gelokaliseerd via i18n) ------------------ */
     function formatLongDate(d) {
         d = d || new Date();
-        return DAYS_NL[d.getDay()] + " " + d.getDate() + " " + MONTHS_NL[d.getMonth()] + " " + d.getFullYear();
+        var dd = dict();
+        var days   = dd.days   || ["zondag","maandag","dinsdag","woensdag","donderdag","vrijdag","zaterdag"];
+        var months = dd.months || ["januari","februari","maart","april","mei","juni","juli","augustus","september","oktober","november","december"];
+        return days[d.getDay()] + " " + d.getDate() + " " + months[d.getMonth()] + " " + d.getFullYear();
     }
     function formatClock(d) {
         d = d || new Date();
@@ -184,6 +235,13 @@
         isNow:          isNow,
         chunk:          chunk,
         esc:            esc,
-        setStatus:      setStatus
+        setStatus:      setStatus,
+        // i18n
+        initLang:       initLang,
+        getLang:        getLang,
+        t:              t,
+        pick:           pick,
+        plural:         plural,
+        applyI18n:      applyI18n
     };
 })(window);

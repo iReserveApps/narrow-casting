@@ -4,6 +4,7 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Aan de slag — i-Reserve Narrow Casting</title>
+    <!--suppress CssNoGenericFontName -->
     <style>
         :root{
             --ir-primary:#67b516; --ir-primary-700:#356309; --ir-accent:#1667b5;
@@ -15,7 +16,11 @@
         .topbar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;}
         .topbar .inner{max-width:860px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:16px;}
         .topbar img{height:40px;}
-        .topbar .back{margin-left:auto;font-size:14px;color:var(--ir-primary-700);text-decoration:none;font-weight:600;}
+        .topbar .langswitch{margin-left:auto;display:flex;gap:4px;}
+        .topbar .langswitch a{font-size:13px;font-weight:600;text-decoration:none;color:var(--muted);
+            border:1px solid var(--line);background:#fff;padding:5px 12px;border-radius:999px;}
+        .topbar .langswitch a.active{background:var(--ir-primary);color:#fff;border-color:var(--ir-primary);}
+        .topbar .back{font-size:14px;color:var(--ir-primary-700);text-decoration:none;font-weight:600;margin-left:16px;}
         .topbar .back:hover{text-decoration:underline;}
         .wrap{max-width:860px;margin:0 auto;padding:32px 24px 80px;}
         h1{font-size:30px;color:var(--ir-primary-700);margin:.2em 0 .1em;}
@@ -38,7 +43,11 @@
 <body>
     <div class="topbar"><div class="inner">
         <img src="../shared/i-reserve-logo.png" alt="i-Reserve"/>
-        <a class="back" href="../index.html">← Terug naar overzicht</a>
+        <div class="langswitch">
+            <a class="active" href="aan-de-slag.html">NL</a>
+            <a href="aan-de-slag.en.html">EN</a>
+        </div>
+        <a class="back" href="../index.html?lang=nl">← Terug naar overzicht</a>
     </div></div>
 
     <div class="wrap">

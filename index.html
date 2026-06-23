@@ -5,13 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>i-Reserve Narrow Casting SDK</title>
     <link rel="stylesheet" href="shared/ireserve.css"/>
+    <!--suppress CssUnusedSymbol -->
     <style>
         body { overflow: auto; background: var(--ir-bg); }
         .wrap { max-width: 1100px; margin: 0 auto; padding: 6vh 24px; font-size: 16px; }
         header.top { display: flex; align-items: center; gap: 20px; margin-bottom: 8px; }
         header.top img { height: 64px; }
         h1 { font-size: 30px; color: var(--ir-primary-700); margin: 0; }
-        .lead { color: var(--ir-muted); font-size: 18px; max-width: 70ch; margin: 8px 0 40px; }
+        .langswitch { margin-left: auto; display: flex; gap: 4px; }
+        .langswitch button {
+            font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+            border: 1px solid var(--ir-line); background: var(--ir-surface); color: var(--ir-muted);
+            padding: 6px 14px; border-radius: 999px;
+        }
+        .langswitch button.active { background: var(--ir-primary); color: #fff; border-color: var(--ir-primary); }
+        .lead { color: var(--ir-muted); font-size: 18px; max-width: 70ch; margin: 8px 0 4px; }
+        .tip  { color: var(--ir-muted); font-size: 16px; max-width: 70ch; margin: 0 0 40px; }
         .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
         a.card {
             display: block; text-decoration: none; color: inherit;
@@ -21,9 +30,7 @@
         a.card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(53,99,9,.14); }
         a.card .num { font-size: 13px; font-weight: 700; letter-spacing: 1px; color: var(--ir-primary); }
         a.card h2 { font-size: 20px; margin: 6px 0 8px; color: var(--ir-ink); }
-        a.card p { font-size: 15px; color: var(--ir-muted); margin: 0 0 12px; }
-        a.card .src { font-size: 13px; color: var(--ir-primary-700); background: rgba(103,181,22,.14);
-                      padding: 3px 8px; border-radius: 999px; display: inline-block; }
+        a.card p { font-size: 15px; color: var(--ir-muted); margin: 0; }
         .docs { margin-top: 40px; padding: 22px; background: var(--ir-surface);
                 border: 1px solid var(--ir-line); border-radius: var(--ir-radius); }
         .docs h2 { margin-top: 0; color: var(--ir-primary-700); font-size: 20px; }
@@ -36,49 +43,80 @@
 <div class="wrap">
     <header class="top">
         <img src="shared/i-reserve-logo.png" alt="i-Reserve"/>
-        <div>
-            <h1>Narrow Casting SDK</h1>
+        <div><h1 data-i18n="launcher.subtitle">Narrow Casting SDK</h1></div>
+        <div class="langswitch">
+            <button type="button" data-lang="nl">NL</button>
+            <button type="button" data-lang="en">EN</button>
         </div>
     </header>
-    <p class="lead">
-        Kant-en-klare, klant-neutrale voorbeelden om boekingen van i-Reserve op een scherm te tonen.
-        Kopieer een voorbeeldmap, pas <code>config.js</code> aan, en je hebt een werkende
-        narrow-casting-pagina. Werkt rechtstreeks vanaf <code>file://</code>.
-        <br><strong>Tip:</strong> de voorbeelden tonen direct <em>demo-data</em> zolang
-        <code>baseUrl</code> nog op <code>JOUWOMGEVING</code> staat — gewoon openen en bekijken.
-    </p>
+
+    <p class="lead" data-i18n-html="launcher.lead"></p>
+    <p class="tip"  data-i18n-html="launcher.tip"></p>
 
     <div class="cards">
         <a class="card" href="examples/01-dagrooster-tabel/index.html">
             <div class="num">01</div>
-            <h2>Dagrooster-tabel</h2>
-            <p>Tabel met activiteiten van vandaag, automatische paginatie en optionele foto-slideshow ertussen.</p>
+            <h2 data-i18n="launcher.card01t">Dagrooster-tabel</h2>
+            <p data-i18n="launcher.card01d"></p>
         </a>
         <a class="card" href="examples/02-kamerbordjes/index.html">
             <div class="num">02</div>
-            <h2>Kamerbordjes "nu bezig"</h2>
-            <p>Gekleurde kamerkaarten die per ruimte tonen wat er nú bezig is, anders het eerstvolgende.</p>
+            <h2 data-i18n="launcher.card02t">Kamerbordjes</h2>
+            <p data-i18n="launcher.card02d"></p>
         </a>
         <a class="card" href="examples/03-fullscreen-slideshow/index.html">
             <div class="num">03</div>
-            <h2>Fullscreen slideshow</h2>
-            <p>Schermvullende foto's met onderaan een balk die door de boekingen van vandaag loopt.</p>
+            <h2 data-i18n="launcher.card03t">Fullscreen slideshow</h2>
+            <p data-i18n="launcher.card03d"></p>
         </a>
         <a class="card" href="examples/04-events-grid/index.html">
             <div class="num">04</div>
-            <h2>Events-grid</h2>
-            <p>Kaartjes met publieke activiteiten, inclusief tijd en het aantal vrije plaatsen.</p>
+            <h2 data-i18n="launcher.card04t">Events-grid</h2>
+            <p data-i18n="launcher.card04d"></p>
         </a>
     </div>
 
     <div class="docs">
-        <h2>Eerst dit lezen</h2>
-        <p>Voordat een voorbeeld live werkt moet je een API-gebruiker aanmaken en CORS toestaan in het admin panel:</p>
-        <p>➡ <a href="docs/aan-de-slag.html">Aan de slag</a> &nbsp;·&nbsp;
-           <a href="docs/authenticatie-en-cors.html">Authenticatie &amp; CORS</a></p>
+        <h2 data-i18n="launcher.docsTitle">Eerst dit lezen</h2>
+        <p data-i18n="launcher.docsIntro"></p>
+        <p>➡ <a class="doc-start" href="docs/aan-de-slag.html" data-i18n="launcher.docsStart">Aan de slag</a> &nbsp;·&nbsp;
+           <a class="doc-auth" href="docs/authenticatie-en-cors.html" data-i18n="launcher.docsAuth">Authenticatie &amp; CORS</a></p>
     </div>
 
-    <footer>i-Reserve Narrow Casting SDK · neutrale voorbeelden voor eigen implementatie</footer>
+    <footer data-i18n="launcher.footer"></footer>
 </div>
+
+<script src="shared/ireserve.js"></script>
+<script src="shared/i18n.js"></script>
+<script>
+(function () {
+    var lang = iReserve.initLang(null);          // leest ?lang, anders "nl"
+    document.documentElement.lang = lang;
+    iReserve.applyI18n();
+
+    // markeer actieve taalknop + schakelen
+    document.querySelectorAll(".langswitch button").forEach(function (b) {
+        if (b.getAttribute("data-lang") === lang) b.classList.add("active");
+        b.addEventListener("click", function () {
+            var u = new URL(location.href);
+            u.searchParams.set("lang", b.getAttribute("data-lang"));
+            location.href = u.toString();
+        });
+    });
+
+    // geef de gekozen taal door aan de voorbeeldlinks
+    document.querySelectorAll(".cards a.card").forEach(function (a) {
+        a.href = a.getAttribute("href") + "?lang=" + lang;
+    });
+
+    // docs: in het Engels naar de .en.html-varianten verwijzen
+    if (lang === "en") {
+        var ds = document.querySelector(".doc-start");
+        var da = document.querySelector(".doc-auth");
+        if (ds) ds.href = "docs/aan-de-slag.en.html";
+        if (da) da.href = "docs/authenticatie-en-cors.en.html";
+    }
+})();
+</script>
 </body>
 </html>

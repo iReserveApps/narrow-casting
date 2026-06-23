@@ -22,18 +22,26 @@ window.NC_CONFIG = {
 
     refreshMinutes: 5,   // korter interval: "nu bezig" moet actueel zijn
 
-    title: "What's going on?",
+    lang: "nl",          // "nl" of "en" — te overschrijven met ?lang=en
 
-    /* Ruimtes met vaste volgorde + accentkleur. Laat leeg ([]) om de
-       ruimtes automatisch uit de data af te leiden.
-       'match' = de waarde in OBJ_NAME waarop deze kaart matcht. */
-    rooms: [
-        { match: "Stadskamer", label: "Stadskamer", color: "#ea72ad" },
-        { match: "Zaal S",     label: "S",          color: "#3ea992" },
-        { match: "Zaal M",     label: "M",          color: "#7161a8" },
-        { match: "Zaal L",     label: "L",          color: "#ea7373" },
-        { match: "Zaal XL",    label: "XL",         color: "#72bfd5" }
-    ],
+    title: { nl: "Wat is er te doen?", en: "What's going on?" },
+
+    /* Ruimtes: leeg ([]) = automatisch afleiden uit de data (met een
+       kleurenpalet) — dit werkt meteen, ook in de tweetalige demo.
+
+       Voor productie kun je ze vastpinnen met vaste volgorde, kleur en
+       (eventueel meertalige) labels. 'match' = de waarde in OBJ_NAME
+       waarop de kaart matcht (de echte ruimtenaam uit i-Reserve):
+
+         rooms: [
+           { match: "Stadskamer", label: { nl: "Stadskamer", en: "City room" }, color: "#ea72ad" },
+           { match: "Zaal S",     label: "S",  color: "#3ea992" },
+           { match: "Zaal M",     label: "M",  color: "#7161a8" },
+           { match: "Zaal L",     label: "L",  color: "#ea7373" },
+           { match: "Zaal XL",    label: "XL", color: "#72bfd5" }
+         ]
+    */
+    rooms: [],
 
     columnMap: {
         room:     "OBJ_NAME",

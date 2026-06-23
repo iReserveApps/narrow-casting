@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>i-Reserve NC — Dagrooster</title>
     <link rel="stylesheet" href="../../shared/ireserve.css"/>
+    <!--suppress CssUnusedSymbol -->
     <style>
         /* Fullscreen foto-slide (optioneel, tussen tabelpagina's door) */
         #nc-slide {
@@ -35,9 +36,9 @@
                 <caption id="nc-title">Programma van vandaag</caption>
                 <thead>
                     <tr>
-                        <th style="width:42%">Activiteit</th>
-                        <th style="width:24%">Tijd</th>
-                        <th>Locatie</th>
+                        <th style="width:42%" data-i18n="ui.activity">Activiteit</th>
+                        <th style="width:24%" data-i18n="ui.time">Tijd</th>
+                        <th data-i18n="ui.location">Locatie</th>
                     </tr>
                 </thead>
                 <tbody id="nc-rows"></tbody>
@@ -47,13 +48,14 @@
 
         <footer class="nc-footer">
             <img class="nc-logo" src="../../shared/i-reserve-logo.png" alt=""/>
-            <span>Powered by i-Reserve</span>
+            <span data-i18n="ui.poweredBy">Powered by i-Reserve</span>
         </footer>
     </div>
 
     <div class="nc-status" id="nc-status" hidden></div>
 
     <script src="../../shared/ireserve.js"></script>
+    <script src="../../shared/i18n.js"></script>
     <script src="../../shared/demo-data.js"></script>
     <script src="config.js"></script>
     <script>
@@ -61,7 +63,9 @@
         var cfg = window.NC_CONFIG;
         var map = cfg.columnMap;
 
-        document.getElementById("nc-title").textContent = cfg.title;
+        iReserve.initLang(cfg);
+        iReserve.applyI18n();
+        document.getElementById("nc-title").textContent = iReserve.pick(cfg.title);
         document.getElementById("nc-date").textContent  = iReserve.formatLongDate();
 
         // --- Slideshow-state ---
@@ -109,7 +113,7 @@
             var rows = pages[idx] || [];
             var tbody = document.getElementById("nc-rows");
             if (rows.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="3"><div class="nc-empty">Geen activiteiten vandaag</div></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="3"><div class="nc-empty">' + iReserve.t("ui.noToday") + '</div></td></tr>';
             } else {
                 tbody.innerHTML = rows.map(function (r) {
                     return '<tr class="nc-fade">' +
@@ -120,7 +124,7 @@
                 }).join("");
             }
             document.getElementById("nc-pager").textContent =
-                pages.length > 1 ? "Pagina " + (idx + 1) + " / " + pages.length : "";
+                pages.length > 1 ? iReserve.t("ui.page", { n: idx + 1, m: pages.length }) : "";
         }
 
         function showPhoto(i) {

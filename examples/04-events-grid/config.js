@@ -12,8 +12,6 @@ window.NC_CONFIG = {
        auth nodig, vul dan username/password in; anders mag auth weg. */
     auth: null,
 
-    lang: "nl",
-
     columns: [
         "EVENT_ID",
         "EVENT_DESC",       // titel
@@ -29,7 +27,9 @@ window.NC_CONFIG = {
     search: 'EVENT_DATE >= "0d" AND EVENT_DATE <= "7d"',
     refreshMinutes: 15,
 
-    title: "Activiteiten",
+    lang: "nl",          // "nl" of "en" — te overschrijven met ?lang=en
+
+    title: { nl: "Activiteiten", en: "Activities" },
 
     columnMap: {
         title:   "EVENT_DESC",
