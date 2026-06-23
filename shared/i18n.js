@@ -81,7 +81,7 @@
             launcher: {
                 subtitle:  "Narrow Casting SDK",
                 lead:      "Ready-made, client-neutral examples for showing i-Reserve bookings on a screen. Copy an example folder, edit <code>config.js</code>, and you have a working narrow-casting page. Runs straight from <code>file://</code>.",
-                tip:       "<strong>Tip:</strong> the examples show <em>demo data</em> right away while <code>baseUrl</code> is still set to <code>JOUWOMGEVING</code> — just open and view.",
+                tip:       "<strong>Tip:</strong> the examples show <em>demo data</em> right away while <code>baseUrl</code> is still set to <code>YOURENVIRONMENT</code> — just open and view.",
                 card01t:   "Day schedule table",
                 card01d:   "Table with today's activities, automatic pagination and an optional photo slideshow in between.",
                 card02t:   "Room signs “in use”",

@@ -93,11 +93,12 @@
     }
 
     /* ---- Demo-modus -------------------------------------------------
-       Actief als cfg.demo === true OF zolang baseUrl nog de placeholder
-       "JOUWOMGEVING" bevat. Dan komt de data uit shared/demo-data.js
-       i.p.v. de echte API, zodat de voorbeelden direct werken. */
+       Actief als cfg.demo === true OF zolang baseUrl nog een placeholder
+       bevat. De placeholder verschilt per taal in de documentatie
+       ("JOUWOMGEVING" in NL, "YOURENVIRONMENT" in EN); beide triggeren
+       demo-data uit shared/demo-data.js i.p.v. de echte API. */
     function isDemo(cfg) {
-        return cfg.demo === true || /JOUWOMGEVING/i.test(cfg.baseUrl || "");
+        return cfg.demo === true || /JOUWOMGEVING|YOURENVIRONMENT/i.test(cfg.baseUrl || "");
     }
     function demoRows(cfg) {
         var src = global.IR_DEMO;

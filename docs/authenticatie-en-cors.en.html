@@ -77,7 +77,7 @@
 
         <h2 id="how">1. How the connection works</h2>
         <p>Each example fetches data with a GET request to the REST API:</p>
-        <pre><code>GET https://JOUWOMGEVING.i-reserve.net/api/rest/booking/filter?columns=...&amp;search=...
+        <pre><code>GET https://YOURENVIRONMENT.i-reserve.net/api/rest/booking/filter?columns=...&amp;search=...
 Authorization: Basic &lt;base64(user:password)&gt;</code></pre>
         <ul>
             <li><code>booking/filter</code> → reservations/bookings (day schedule, room signs, slideshow).</li>
@@ -108,7 +108,7 @@ Authorization: Basic &lt;base64(user:password)&gt;</code></pre>
         <p>If an endpoint needs no authentication (some <strong>public</strong> event endpoints), set <code>auth: null</code>.</p>
 
         <h2 id="cors">4. Allow CORS in the admin panel ⭐</h2>
-        <p>This is the step most often forgotten. The browser blocks requests to a different domain than the page came from by default. A narrow-casting page usually runs as a file (<code>file://</code>) or on a local box — a <strong>different origin</strong> than <code>https://JOUWOMGEVING.i-reserve.net</code>. So the API must explicitly allow this origin to make requests (CORS = Cross-Origin Resource Sharing).</p>
+        <p>This is the step most often forgotten. The browser blocks requests to a different domain than the page came from by default. A narrow-casting page usually runs as a file (<code>file://</code>) or on a local box — a <strong>different origin</strong> than <code>https://YOURENVIRONMENT.i-reserve.net</code>. So the API must explicitly allow this origin to make requests (CORS = Cross-Origin Resource Sharing).</p>
 
         <h3>Which origin should you allow?</h3>
         <table>
@@ -146,7 +146,7 @@ https://signage.yourdomain.com</code></pre>
         <h2 id="test">6. Testing that it works</h2>
         <p>First test outside the browser with <code>curl</code> (no CORS restriction, so purely the auth/filter check):</p>
         <pre><code>curl -u "API_signage:YOUR_PASSWORD" \
-  'https://JOUWOMGEVING.i-reserve.net/api/rest/booking/filter?columns=RES_CUSTOM02,RES_FROMTIME,RES_TILTIME&amp;search=startdatum%20%3E%3D%20%220d%22'</code></pre>
+  'https://YOURENVIRONMENT.i-reserve.net/api/rest/booking/filter?columns=RES_CUSTOM02,RES_FROMTIME,RES_TILTIME&amp;search=startdatum%20%3E%3D%20%220d%22'</code></pre>
         <ul>
             <li><strong>JSON returned</strong> → auth and filter are fine. Then open the screen in the browser.</li>
             <li><strong>401 Unauthorized</strong> → username/password or rights are wrong (§2).</li>
