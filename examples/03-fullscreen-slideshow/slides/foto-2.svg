@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#147a8c"/><stop offset="1" stop-color="#0a4f6e"/>
+  </linearGradient></defs>
+  <rect width="1920" height="1080" fill="url(#g)"/>
+  <text x="960" y="520" font-family="Inter, system-ui, sans-serif" font-size="120"
+        font-weight="700" fill="#ffffff" text-anchor="middle" opacity="0.9">Onze ruimtes</text>
+  <text x="960" y="610" font-family="Inter, system-ui, sans-serif" font-size="38"
+        fill="#ffffff" text-anchor="middle" opacity="0.6">voorbeeld-afbeelding — vervang door eigen foto</text>
+</svg>

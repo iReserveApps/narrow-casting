@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="nl">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>i-Reserve NC — Slideshow</title>
+    <link rel="stylesheet" href="../../shared/ireserve.css"/>
+    <style>
+        body { background: #000; }
+        .stage { position: fixed; inset: 0; overflow: hidden; }
+        .stage img {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: cover; opacity: 0; transition: opacity 1.2s ease-in-out;
+        }
+        .stage img.is-visible { opacity: 1; }
+
+        /* Onderschrift-balk */
+        .caption {
+            position: fixed; left: 0; right: 0; bottom: 0;
+            padding: 4vh 5vw 4vh;
+            background: linear-gradient(to top, rgba(53,99,9,.92), rgba(53,99,9,0));
+            color: #fff;
+            display: flex; align-items: flex-end; justify-content: space-between; gap: 3vw;
+        }
+        .caption .ev-title { font-size: 4.5vh; font-weight: 700; line-height: 1.1; }
+        .caption .ev-meta  { font-size: 2.6vh; opacity: .92; margin-top: 1vh;
+                             font-variant-numeric: tabular-nums; }
+        .caption .brand    { height: 5vh; width: auto; flex: 0 0 auto;
+                             background: #fff; padding: 1.2vh 1.6vw; border-radius: 12px;
+                             box-shadow: 0 2px 10px rgba(0,0,0,.25); }
+
+        .topbar {
+            position: fixed; top: 0; left: 0; right: 0;
+            padding: 3vh 5vw;
+            display: flex; justify-content: space-between; align-items: center;
+            color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.4);
+            background: linear-gradient(to bottom, rgba(0,0,0,.45), rgba(0,0,0,0));
+        }
+        .topbar .t { font-size: 3vh; font-weight: 700; }
+        .topbar .d { font-size: 2.2vh; opacity: .9; text-transform: capitalize; }
+    </style>
+</head>
+<body>
+    <div class="stage" id="stage"></div>
+
+    <div class="topbar">
+        <div class="t" id="nc-title"></div>
+        <div class="d" id="nc-date"></div>
+    </div>
+
+    <div class="caption">
+        <div>
+            <div class="ev-title" id="ev-title">—</div>
+            <div class="ev-meta"  id="ev-meta"></div>
+        </div>
+        <img class="brand" src="../../shared/i-reserve-logo.png" alt="i-Reserve"/>
+    </div>
+
+    <div class="nc-status" id="nc-status" hidden></div>
+
+    <script src="../../shared/ireserve.js"></script>
+    <script src="../../shared/demo-data.js"></script>
+    <script src="config.js"></script>
+    <script>
+    (function () {
+        var cfg = window.NC_CONFIG, map = cfg.columnMap;
+        document.getElementById("nc-title").textContent = cfg.title || "";
+        document.getElementById("nc-date").textContent  = iReserve.formatLongDate();
+
+        // ---- Foto-carousel ----
+        var stage = document.getElementById("stage");
+        var imgEls = [];
+        (cfg.slides || []).forEach(function (src) {
+            var probe = new Image();
+            probe.onload = function () {
+                var el = document.createElement("img");
+                el.src = src;
+                stage.appendChild(el);
+                imgEls.push(el);
+                if (imgEls.length === 1) el.classList.add("is-visible");
+            };
+            probe.onerror = function () { console.warn("Foto niet gevonden:", src); };
+            probe.src = src;
+        });
+        var photoIdx = 0;
+        setInterval(function () {
+            if (imgEls.length < 2) return;
+            imgEls[photoIdx].classList.remove("is-visible");
+            photoIdx = (photoIdx + 1) % imgEls.length;
+            imgEls[photoIdx].classList.add("is-visible");
+        }, (cfg.slideSeconds || 8) * 1000);
+
+        // ---- Boekingen-onderschrift ----
+        var bookings = [], capIdx = 0;
+        iReserve.poll(cfg, function (rows) { bookings = rows; capIdx = 0; showCaption(); });
+
+        setInterval(showCaption, (cfg.slideSeconds || 8) * 1000);
+
+        function showCaption() {
+            var t = document.getElementById("ev-title");
+            var m = document.getElementById("ev-meta");
+            if (!bookings.length) { t.textContent = "Geen activiteiten vandaag"; m.textContent = ""; return; }
+            capIdx = capIdx % bookings.length;
+            var b = bookings[capIdx];
+            t.textContent = b[map.title] || "";
+            var loc = b[map.location] ? "  ·  " + b[map.location] : "";
+            m.textContent = iReserve.timeRange(b[map.from], b[map.til]) + loc;
+            t.classList.remove("nc-fade"); void t.offsetWidth; t.classList.add("nc-fade");
+            capIdx++;
+        }
+    })();
+    </script>
+</body>
+</html>

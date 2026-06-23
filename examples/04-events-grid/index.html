@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="nl">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>i-Reserve NC — Events</title>
+    <link rel="stylesheet" href="../../shared/ireserve.css"/>
+    <style>
+        .nc-grid {
+            flex: 1 1 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(26vw, 1fr));
+            gap: 2vh 1.6vw;
+            align-content: start;
+            overflow: hidden;
+        }
+        .event {
+            background: var(--ir-surface);
+            border-radius: var(--ir-radius);
+            border-left: 8px solid var(--ir-primary);
+            padding: 2.2vh 1.8vw;
+            display: flex; flex-direction: column; gap: 1vh;
+            box-shadow: 0 1vh 2.4vh rgba(7,86,74,.08);
+        }
+        .event.is-full   { border-left-color: #b00020; opacity: .75; }
+        .event.is-soon   { border-left-color: #f5a623; }
+        .event .ev-title { font-size: 2.6vh; font-weight: 700; color: var(--ir-ink); }
+        .event .ev-when  { font-size: 2vh; color: var(--ir-primary-700); font-variant-numeric: tabular-nums; }
+        .event .ev-loc   { font-size: 1.8vh; color: var(--ir-muted); }
+        .event .ev-avail {
+            margin-top: auto; font-size: 1.9vh; font-weight: 600;
+            display: inline-flex; align-items: center; gap: .6vw;
+        }
+        .badge { padding: .3vh .8vw; border-radius: 999px; font-size: 1.6vh; }
+        .badge.free { background: rgba(103,181,22,.16); color: var(--ir-primary-700); }
+        .badge.soon { background: rgba(245,166,35,.18); color: #8a5a00; }
+        .badge.full { background: rgba(176,0,32,.12);  color: #b00020; }
+    </style>
+</head>
+<body>
+    <div class="nc-screen">
+        <header class="nc-header">
+            <img class="nc-logo" src="../../shared/i-reserve-logo.png" alt="i-Reserve"/>
+            <h1 class="nc-title" id="nc-title"></h1>
+            <div class="nc-date" id="nc-date"></div>
+        </header>
+
+        <main class="nc-body">
+            <div class="nc-grid" id="nc-grid"></div>
+        </main>
+
+        <footer class="nc-footer"><span>Powered by i-Reserve</span></footer>
+    </div>
+
+    <div class="nc-status" id="nc-status" hidden></div>
+
+    <script src="../../shared/ireserve.js"></script>
+    <script src="../../shared/demo-data.js"></script>
+    <script src="config.js"></script>
+    <script>
+    (function () {
+        var cfg = window.NC_CONFIG, map = cfg.columnMap;
+        document.getElementById("nc-title").textContent = cfg.title || "";
+        document.getElementById("nc-date").textContent  = iReserve.formatLongDate();
+
+        iReserve.poll(cfg, render);
+
+        function render(rows) {
+            var grid = document.getElementById("nc-grid");
+            if (!rows.length) {
+                grid.innerHTML = '<div class="nc-empty">Geen geplande activiteiten</div>';
+                return;
+            }
+            grid.innerHTML = rows.map(function (e) {
+                var total = num(e[map.total]);
+                var booked = num(e[map.booked]);
+                var free = (total !== null && booked !== null) ? Math.max(0, total - booked) : null;
+
+                var cls = "", badge = "";
+                if (free === null) {
+                    badge = "";
+                } else if (free === 0) {
+                    cls = "is-full"; badge = '<span class="badge full">Vol</span>';
+                } else if (free <= 3) {
+                    cls = "is-soon"; badge = '<span class="badge soon">Nog ' + free + plekken(free) + '</span>';
+                } else {
+                    badge = '<span class="badge free">' + free + plekken(free) + ' vrij</span>';
+                }
+
+                var when = dateLabel(e[map.date]) + " · " + iReserve.timeRange(e[map.from], e[map.til]);
+                return '<div class="event ' + cls + ' nc-fade">' +
+                    '<div class="ev-title">' + iReserve.esc(e[map.title]) + '</div>' +
+                    '<div class="ev-when">' + iReserve.esc(when) + '</div>' +
+                    (e[map.location] ? '<div class="ev-loc">' + iReserve.esc(e[map.location]) + '</div>' : '') +
+                    '<div class="ev-avail">' + badge + '</div>' +
+                '</div>';
+            }).join("");
+        }
+
+        function num(v) { var n = parseInt(v, 10); return isNaN(n) ? null : n; }
+        function plekken(n) { return n === 1 ? " plek" : " plekken"; }
+        function dateLabel(d) {
+            // verwacht "YYYY-MM-DD" of "DD-MM-YYYY"; toont "do 5 jun" indien parsebaar
+            var s = String(d || "");
+            var m = s.match(/(\d{4})-(\d{2})-(\d{2})/) ;
+            if (m) { var dt = new Date(+m[1], +m[2]-1, +m[3]); return iReserve.formatLongDate(dt).replace(/ \d{4}$/, ""); }
+            return s;
+        }
+    })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+/* =====================================================================
+   i-Reserve Narrow Casting SDK — gedeelde stijl (neutrale i-Reserve huisstijl)
+   ---------------------------------------------------------------------
+   Pas de huisstijl aan door ALLEEN de variabelen in :root te wijzigen.
+   Wil je een klantkleur? Overschrijf --ir-primary etc. in je eigen
+   <style> of config — de rest van de SDK volgt automatisch.
+   ===================================================================== */
+
+:root {
+    /* --- i-Reserve huisstijl (officiële merkkleuren) --- */
+    --ir-primary:      #67b516;   /* i-Reserve groen (hoofdkleur)       */
+    --ir-primary-600:  #4e8a11;   /* donkerder groen                    */
+    --ir-primary-700:  #356309;   /* diepgroen (titelbalk, witte tekst) */
+    --ir-accent:       #1667b5;   /* i-Reserve blauw (accent/highlight) */
+
+    /* --- Neutralen --- */
+    --ir-ink:          #333333;   /* hoofdtekst                         */
+    --ir-muted:        #777777;   /* secundaire tekst                   */
+    --ir-on-primary:   #ffffff;   /* tekst op gekleurde balken          */
+    --ir-surface:      #ffffff;   /* kaart-/tabelachtergrond            */
+    --ir-surface-alt:  #f0f7e7;   /* lichtgroene tint (gestreepte rijen)*/
+    --ir-bg:           #f4f4f4;   /* paginaachtergrond                  */
+    --ir-line:         #e7e7e7;   /* lijnen/randen                      */
+
+    /* --- Vorm & typografie --- */
+    --ir-radius:       18px;
+    --ir-radius-sm:    10px;
+    --ir-font:         "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --ir-font-display: var(--ir-font);
+
+    /* --- Schaal (vw-gebaseerd zodat het meeschaalt met schermgrootte) --- */
+    --ir-pad:          4vh 5vw;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: var(--ir-bg);
+    color: var(--ir-ink);
+    font-family: var(--ir-font);
+    font-size: 1.4vh;            /* meeschalend basisformaat */
+    line-height: 1.4;
+    overflow: hidden;            /* narrow casting = geen scrollbars */
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ---------------------------------------------------------------------
+   Schermindeling: header (logo) — body (content) — footer
+   --------------------------------------------------------------------- */
+.nc-screen {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: var(--ir-pad);
+}
+
+.nc-header {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2vw;
+    margin-bottom: 3vh;
+}
+.nc-header .nc-logo { height: 7vh; width: auto; display: block; }
+.nc-header .nc-title {
+    font-family: var(--ir-font-display);
+    font-weight: 700;
+    font-size: 3.4vh;
+    color: var(--ir-primary-700);
+    margin: 0;
+}
+.nc-header .nc-date {
+    font-size: 2.2vh;
+    color: var(--ir-muted);
+    text-transform: capitalize;
+}
+
+.nc-body {
+    flex: 1 1 auto;
+    min-height: 0;              /* laat children correct krimpen */
+    display: flex;
+    flex-direction: column;
+}
+
+.nc-footer {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1vw;
+    margin-top: 2vh;
+    color: var(--ir-muted);
+    font-size: 1.8vh;
+}
+.nc-footer .nc-logo { height: 4vh; width: auto; opacity: .8; }
+
+/* ---------------------------------------------------------------------
+   Tabel (dagrooster)
+   --------------------------------------------------------------------- */
+.nc-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--ir-surface);
+    border-radius: var(--ir-radius);
+    overflow: hidden;
+    box-shadow: 0 1.2vh 3vh rgba(53, 99, 9, .10);
+}
+.nc-table caption {
+    caption-side: top;
+    background: var(--ir-primary-700);
+    color: var(--ir-on-primary);
+    font-size: 3vh;
+    font-weight: 700;
+    padding: 1.6vh 2vw .6vh;
+}
+.nc-table thead th {
+    background: var(--ir-primary-600);
+    color: var(--ir-on-primary);
+    text-align: left;
+    font-weight: 600;
+    font-size: 2vh;
+    padding: 1.4vh 1.6vw;
+}
+.nc-table tbody td {
+    padding: 1.5vh 1.6vw;
+    font-size: 2.2vh;
+    border-bottom: 1px solid var(--ir-line);
+    color: var(--ir-ink);
+}
+.nc-table tbody tr:nth-child(even) td { background: var(--ir-surface-alt); }
+.nc-table tbody tr:last-child td { border-bottom: 0; }
+.nc-table .nc-time { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--ir-primary-700); font-weight: 600; }
+
+/* paginanummer onder de tabel */
+.nc-pager {
+    text-align: center;
+    color: var(--ir-muted);
+    font-size: 1.8vh;
+    margin-top: 1.5vh;
+}
+
+/* ---------------------------------------------------------------------
+   Animaties
+   --------------------------------------------------------------------- */
+.nc-fade { animation: ncFade .8s ease both; }
+@keyframes ncFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* status-/foutmelding (zichtbaar als de API niet bereikbaar is) */
+.nc-status {
+    position: fixed;
+    bottom: 1vh; left: 1vw;
+    font-size: 1.4vh;
+    color: var(--ir-muted);
+    background: rgba(255,255,255,.7);
+    padding: .4vh .8vw;
+    border-radius: 6px;
+    pointer-events: none;
+}
+.nc-status[data-state="error"] { color: #b00020; }
+.nc-status[hidden] { display: none; }
+
+/* lege staat */
+.nc-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--ir-muted);
+    font-size: 2.6vh;
+}

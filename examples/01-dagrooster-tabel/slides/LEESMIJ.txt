@@ -1,0 +1,5 @@
+Plaats hier de fullscreen foto's die tussen de tabelpagina's door getoond worden
+(bijv. zaal1.jpg, evenement.jpg) en zet de bestandsnamen in config.js bij "slides".
+
+Laat config.js "slides": [] staan als je geen foto's wilt.
+Niet-bestaande bestanden worden automatisch overgeslagen.

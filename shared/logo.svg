@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 96" role="img" aria-label="i-Reserve">
+  <!-- Neutraal placeholder-logo. Vervang dit bestand door het officiële
+       i-Reserve (of klant-)logo, of pas de kleuren aan via currentColor. -->
+  <defs>
+    <linearGradient id="irg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a7d6e"/>
+      <stop offset="1" stop-color="#07564a"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="14" width="68" height="68" rx="18" fill="url(#irg)"/>
+  <circle cx="36" cy="34" r="6.5" fill="#fff"/>
+  <rect x="29.5" y="46" width="13" height="26" rx="6.5" fill="#fff"/>
+  <text x="88" y="60" font-family="Inter, Segoe UI, system-ui, sans-serif"
+        font-size="44" font-weight="700" fill="#07564a">i-Reserve</text>
+  <text x="90" y="80" font-family="Inter, Segoe UI, system-ui, sans-serif"
+        font-size="15" font-weight="500" letter-spacing="2" fill="#0a7d6e">NARROW CASTING</text>
+</svg>

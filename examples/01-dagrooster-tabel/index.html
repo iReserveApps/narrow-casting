@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="nl">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>i-Reserve NC — Dagrooster</title>
+    <link rel="stylesheet" href="../../shared/ireserve.css"/>
+    <style>
+        /* Fullscreen foto-slide (optioneel, tussen tabelpagina's door) */
+        #nc-slide {
+            position: fixed; inset: 0;
+            background: var(--ir-primary-700);
+            opacity: 0; transition: opacity 1s ease-in-out;
+            pointer-events: none; z-index: 10;
+        }
+        #nc-slide.is-visible { opacity: 1; }
+        #nc-slide img { position: absolute; inset: 0; width: 100%; height: 100%; }
+        #nc-slide .fg { object-fit: contain; }
+        #nc-slide .bg { object-fit: cover; filter: blur(12px); transform: scale(1.1); z-index: -1; }
+    </style>
+</head>
+<body>
+
+    <!-- optionele fullscreen foto -->
+    <div id="nc-slide"><img class="fg" alt=""/><img class="bg" alt=""/></div>
+
+    <div class="nc-screen">
+        <header class="nc-header">
+            <img class="nc-logo" src="../../shared/i-reserve-logo.png" alt="i-Reserve"/>
+            <div class="nc-date" id="nc-date"></div>
+        </header>
+
+        <main class="nc-body">
+            <table class="nc-table">
+                <caption id="nc-title">Programma van vandaag</caption>
+                <thead>
+                    <tr>
+                        <th style="width:42%">Activiteit</th>
+                        <th style="width:24%">Tijd</th>
+                        <th>Locatie</th>
+                    </tr>
+                </thead>
+                <tbody id="nc-rows"></tbody>
+            </table>
+            <div class="nc-pager" id="nc-pager"></div>
+        </main>
+
+        <footer class="nc-footer">
+            <img class="nc-logo" src="../../shared/i-reserve-logo.png" alt=""/>
+            <span>Powered by i-Reserve</span>
+        </footer>
+    </div>
+
+    <div class="nc-status" id="nc-status" hidden></div>
+
+    <script src="../../shared/ireserve.js"></script>
+    <script src="../../shared/demo-data.js"></script>
+    <script src="config.js"></script>
+    <script>
+    (function () {
+        var cfg = window.NC_CONFIG;
+        var map = cfg.columnMap;
+
+        document.getElementById("nc-title").textContent = cfg.title;
+        document.getElementById("nc-date").textContent  = iReserve.formatLongDate();
+
+        // --- Slideshow-state ---
+        var pages = [[]];      // tabelpagina's (arrays met rijen)
+        var slideEl = document.getElementById("nc-slide");
+        var validSlides = [];  // afbeeldingen die echt bestaan
+        preloadSlides(cfg.slides || []);
+
+        var runId = 0;         // voorkomt dat oude loops doorlopen na refresh
+
+        // --- Data ophalen + blijven verversen ---
+        iReserve.poll(cfg, function (rows) {
+            pages = iReserve.chunk(rows, cfg.rowsPerPage);
+            if (pages.length === 0) pages = [[]];
+            runId++;
+            startCycle(runId);
+        });
+
+        // Bouwt de afspeelvolgorde: eerst alle tabelpagina's, daarna de foto's,
+        // en speelt die in een lus af (elke met zijn eigen wachttijd).
+        function startCycle(myId) {
+            var frames = [];
+            for (var p = 0; p < pages.length; p++) frames.push({ type: "page", i: p });
+            for (var s = 0; s < validSlides.length; s++) frames.push({ type: "photo", i: s });
+
+            var step = 0;
+            (function show() {
+                if (myId !== runId) return;          // verouderde lus stoppen
+                var f = frames[step % frames.length];
+                if (f.type === "page") {
+                    hidePhoto();
+                    renderPage(f.i);
+                    step++;
+                    setTimeout(show, cfg.pageSeconds * 1000);
+                } else {
+                    showPhoto(f.i);
+                    step++;
+                    setTimeout(show, cfg.slideSeconds * 1000);
+                }
+            })();
+        }
+
+        // --- Render één tabelpagina ---
+        function renderPage(idx) {
+            var rows = pages[idx] || [];
+            var tbody = document.getElementById("nc-rows");
+            if (rows.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3"><div class="nc-empty">Geen activiteiten vandaag</div></td></tr>';
+            } else {
+                tbody.innerHTML = rows.map(function (r) {
+                    return '<tr class="nc-fade">' +
+                        '<td>' + iReserve.esc(r[map.activiteit]) + '</td>' +
+                        '<td class="nc-time">' + iReserve.esc(iReserve.timeRange(r[map.van], r[map.tot])) + '</td>' +
+                        '<td>' + iReserve.esc(r[map.locatie]) + '</td>' +
+                    '</tr>';
+                }).join("");
+            }
+            document.getElementById("nc-pager").textContent =
+                pages.length > 1 ? "Pagina " + (idx + 1) + " / " + pages.length : "";
+        }
+
+        function showPhoto(i) {
+            var imgs = slideEl.querySelectorAll("img");
+            imgs[0].src = validSlides[i];
+            imgs[1].src = validSlides[i];
+            slideEl.classList.add("is-visible");
+        }
+        function hidePhoto() { slideEl.classList.remove("is-visible"); }
+
+        // Laad alleen afbeeldingen die echt bestaan (voorkomt kapotte slides)
+        function preloadSlides(list) {
+            list.forEach(function (src) {
+                var img = new Image();
+                img.onload  = function () { validSlides.push(src); };
+                img.onerror = function () { console.warn("Slide niet gevonden:", src); };
+                img.src = src;
+            });
+        }
+    })();
+    </script>
+</body>
+</html>

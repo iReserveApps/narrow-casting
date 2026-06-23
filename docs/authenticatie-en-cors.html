@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="nl">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Authenticatie &amp; CORS — i-Reserve Narrow Casting</title>
+    <style>
+        :root{
+            --ir-primary:#67b516; --ir-primary-700:#356309; --ir-accent:#1667b5;
+            --ink:#333; --muted:#777; --line:#e7e7e7; --tint:#f0f7e7; --bg:#f4f4f4;
+            --font:"Inter","Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+        }
+        *{box-sizing:border-box;}
+        body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.6;}
+        .topbar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;}
+        .topbar .inner{max-width:860px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:16px;}
+        .topbar img{height:40px;}
+        .topbar .back{margin-left:auto;font-size:14px;color:var(--ir-primary-700);text-decoration:none;font-weight:600;}
+        .topbar .back:hover{text-decoration:underline;}
+        .wrap{max-width:860px;margin:0 auto;padding:32px 24px 80px;}
+        h1{font-size:30px;color:var(--ir-primary-700);margin:.2em 0 .1em;}
+        .sub{color:var(--muted);margin-top:0;font-size:17px;}
+        h2{font-size:22px;color:var(--ir-primary-700);margin-top:2em;padding-bottom:6px;border-bottom:2px solid var(--tint);}
+        h3{font-size:18px;margin-top:1.6em;}
+        a{color:var(--ir-primary-700);}
+        code{background:var(--tint);padding:2px 6px;border-radius:5px;font-size:.92em;font-family:ui-monospace,Menlo,Consolas,monospace;}
+        pre{background:#1e2a16;color:#e8f3d8;padding:16px 18px;border-radius:10px;overflow-x:auto;font-size:14px;
+            font-family:ui-monospace,Menlo,Consolas,monospace;line-height:1.5;}
+        pre code{background:none;padding:0;color:inherit;}
+        table{border-collapse:collapse;width:100%;margin:1em 0;font-size:15px;}
+        th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top;}
+        th{background:var(--tint);}
+        .callout{border-left:5px solid var(--ir-accent);background:#eef4fb;padding:12px 16px;border-radius:0 10px 10px 0;margin:1.2em 0;}
+        .callout.warn{border-left-color:#e0a800;background:#fdf6e3;}
+        .callout.tip{border-left-color:var(--ir-primary);background:var(--tint);}
+        ul.checklist{list-style:none;padding-left:0;}
+        ul.checklist li{padding-left:28px;position:relative;margin:.4em 0;}
+        ul.checklist li::before{content:"☐";position:absolute;left:0;color:var(--ir-primary);font-weight:700;}
+        .toc{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 20px;margin:1.5em 0;}
+        .toc strong{display:block;margin-bottom:6px;color:var(--ir-primary-700);}
+        .toc ol{margin:0;padding-left:20px;}
+        footer{max-width:860px;margin:0 auto;padding:24px;color:var(--muted);font-size:14px;}
+    </style>
+</head>
+<body>
+    <div class="topbar"><div class="inner">
+        <img src="../shared/i-reserve-logo.png" alt="i-Reserve"/>
+        <a class="back" href="../index.html">← Terug naar overzicht</a>
+    </div></div>
+
+    <div class="wrap">
+        <h1>Authenticatie &amp; CORS instellen</h1>
+        <p class="sub">Hoe je een narrow-casting-scherm verbindt met de i-Reserve REST API.</p>
+
+        <div class="toc">
+            <strong>Op deze pagina</strong>
+            <ol>
+                <li><a href="#werkt">Hoe de koppeling werkt</a></li>
+                <li><a href="#user">API-gebruiker aanmaken</a></li>
+                <li><a href="#auth">Authenticatie in de HTML</a></li>
+                <li><a href="#cors">CORS toestaan in het admin panel ⭐</a></li>
+                <li><a href="#filter">Het filter (search-DSL)</a></li>
+                <li><a href="#test">Testen of het werkt</a></li>
+                <li><a href="#server">Alternatief: mini-webserver</a></li>
+                <li><a href="#checklist">Beveiligingschecklist</a></li>
+            </ol>
+        </div>
+
+        <h2 id="werkt">1. Hoe de koppeling werkt</h2>
+        <p>Elk voorbeeld haalt data op via een GET-request naar de REST API:</p>
+        <pre><code>GET https://JOUWOMGEVING.i-reserve.net/api/rest/booking/filter?columns=...&amp;search=...
+Authorization: Basic &lt;base64(gebruiker:wachtwoord)&gt;</code></pre>
+        <ul>
+            <li><code>booking/filter</code> → reserveringen/boekingen (dagrooster, kamerbordjes, slideshow).</li>
+            <li><code>event/filter</code> → publieke events met beschikbaarheid (events-grid).</li>
+        </ul>
+        <p>De <code>columns</code>-parameter bepaalt welke velden terugkomen; de <code>search</code>-parameter is het filter (zie §5).</p>
+
+        <h2 id="user">2. API-gebruiker aanmaken (read-only!)</h2>
+        <div class="callout warn">
+            <strong>⚠️ Belangrijk:</strong> bij narrow casting staan de inloggegevens leesbaar in de HTML
+            (de browser stuurt ze mee). Gebruik daarom <strong>nooit</strong> een beheerdersaccount, maar
+            een aparte gebruiker met <strong>alleen leesrechten</strong> op precies de producten die het scherm nodig heeft.
+        </div>
+        <ol>
+            <li>Log in op het i-Reserve <strong>admin panel</strong> als beheerder.</li>
+            <li>Ga naar <strong>Gebruikers / Medewerkers</strong> en maak een nieuwe gebruiker aan, bijvoorbeeld <code>API_signage</code>.</li>
+            <li>Geef deze gebruiker een <strong>rol/rechtenprofiel met uitsluitend leesrechten</strong> op boekingen/events. Geen schrijf-, verwijder- of beheerrechten.</li>
+            <li>Beperk waar mogelijk de toegang tot <strong>alleen de relevante producten/zalen</strong>.</li>
+            <li>Kies een sterk, uniek wachtwoord en noteer het. Dit vul je straks in <code>config.js</code> in.</li>
+        </ol>
+        <div class="callout tip">💡 Maak per locatie/scherm-groep eventueel een aparte gebruiker, zodat je credentials per scherm kunt intrekken zonder de rest te raken.</div>
+
+        <h2 id="auth">3. Authenticatie in de HTML (Basic Auth)</h2>
+        <p>De SDK regelt dit automatisch. Je vult alleen je gegevens in <code>config.js</code> in:</p>
+        <pre><code>auth: { username: "API_signage", password: "JOUW_WACHTWOORD" },</code></pre>
+        <p>De helper (<code>shared/ireserve.js</code>) bouwt hier de header van:</p>
+        <pre><code>"Authorization": "Basic " + btoa(username + ":" + password)</code></pre>
+        <p>Heeft een endpoint geen authenticatie nodig (sommige <strong>publieke</strong> event-endpoints), zet dan <code>auth: null</code>.</p>
+
+        <h2 id="cors">4. CORS toestaan in het admin panel ⭐</h2>
+        <p>Dit is de stap die het vaakst vergeten wordt. De browser blokkeert standaard requests naar een ander domein dan waarvan de pagina komt. Een narrow-casting-pagina draait meestal als bestand (<code>file://</code>) of op een lokaal kastje — een <strong>andere origin</strong> dan <code>https://JOUWOMGEVING.i-reserve.net</code>. Daarom moet de API expliciet toestaan dat deze origin requests mag doen (CORS = Cross-Origin Resource Sharing).</p>
+
+        <h3>Welke origin moet je toestaan?</h3>
+        <table>
+            <tr><th>Hoe draait het scherm?</th><th>Origin die je whitelidst</th></tr>
+            <tr><td>Als los bestand geopend (<code>file://.../index.html</code>)</td><td><code>null</code></td></tr>
+            <tr><td>Vanaf een lokale webserver</td><td><code>http://localhost</code> of <code>http://&lt;ip-adres&gt;</code></td></tr>
+            <tr><td>Gehost op een (sub)domein</td><td><code>https://signage.jouwdomein.nl</code></td></tr>
+        </table>
+        <div class="callout">Bij <code>file://</code> stuurt de browser letterlijk de origin <code>null</code>. Die moet dus in de whitelist staan. Kan dat niet, host de pagina dan via een mini-webserver (zie §7).</div>
+
+        <h3>Waar in het admin panel</h3>
+        <ol>
+            <li>Open het <strong>admin panel</strong> → <strong>Instellingen</strong> → <strong>API / Koppelingen</strong> (of <strong>Beveiliging / CORS</strong> — de exacte naam kan per versie verschillen).</li>
+            <li>Zoek de instelling <strong>"Toegestane origins" / "CORS allowed origins"</strong>.</li>
+            <li>Voeg de origin(s) uit de tabel hierboven toe, één per regel, bijvoorbeeld:
+                <pre><code>null
+https://signage.jouwdomein.nl</code></pre>
+            </li>
+            <li>Opslaan. De API stuurt dan de juiste <code>Access-Control-Allow-Origin</code> header terug.</li>
+        </ol>
+        <div class="callout warn">Vermijd <code>*</code> (alles toestaan) in productie. Whitelist alleen de origins die je echt gebruikt. <code>*</code> werkt bovendien niet in combinatie met Basic Auth credentials in sommige browsers.</div>
+
+        <h2 id="filter">5. Het filter (search-DSL)</h2>
+        <p>De <code>search</code>-parameter gebruikt relatieve datums en eenvoudige logica:</p>
+        <table>
+            <tr><th>Voorbeeld</th><th>Betekenis</th></tr>
+            <tr><td><code>startdatum &gt;= "0d" AND startdatum &lt;= "0d"</code></td><td>alleen vandaag</td></tr>
+            <tr><td><code>startdatum &gt;= "0d" AND startdatum &lt;= "7d"</code></td><td>vandaag t/m 7 dagen vooruit</td></tr>
+            <tr><td><code>startdatum &gt;= "-1d"</code></td><td>vanaf gisteren</td></tr>
+            <tr><td><code>... AND product IN (101,102,103)</code></td><td>beperk tot deze product-id's</td></tr>
+        </table>
+        <p><code>"0d"</code> = vandaag, <code>"7d"</code> = over 7 dagen, <code>"-1d"</code> = gisteren. Combineer met <code>AND</code> / <code>OR</code>. De product-id's vind je in het admin panel bij het betreffende product/zaal.</p>
+        <p>De <code>columns</code>-parameter bepaalt de velden in het antwoord, bijvoorbeeld <code>OBJ_TXT_CUSTOM01,RES_CUSTOM02,RES_FROMTIME,RES_TILTIME</code>.</p>
+
+        <h2 id="test">6. Testen of het werkt</h2>
+        <p>Test eerst los van de browser met <code>curl</code> (geen CORS-restrictie, dus puur de auth/filter-check):</p>
+        <pre><code>curl -u "API_signage:JOUW_WACHTWOORD" \
+  'https://JOUWOMGEVING.i-reserve.net/api/rest/booking/filter?columns=RES_CUSTOM02,RES_FROMTIME,RES_TILTIME&amp;search=startdatum%20%3E%3D%20%220d%22'</code></pre>
+        <ul>
+            <li><strong>JSON terug</strong> → auth en filter zijn goed. Open daarna het scherm in de browser.</li>
+            <li><strong>401 Unauthorized</strong> → gebruikersnaam/wachtwoord of rechten kloppen niet (§2).</li>
+            <li><strong>In de browser leeg, in curl wél data</strong> → vrijwel zeker CORS (§4). Open de DevTools-console (F12); een CORS-melding bevestigt dit.</li>
+        </ul>
+        <p>Linksonder op elk scherm staat een statusregel met de laatste ophaalstatus/foutmelding.</p>
+
+        <h2 id="server">7. Alternatief: hosten via een mini-webserver</h2>
+        <p>Lukt het niet om origin <code>null</code> te whitelisten, draai de pagina dan via een lokale webserver. Dan heb je een nette <code>http://localhost</code>-origin:</p>
+        <pre><code># in de map van het voorbeeld
+python3 -m http.server 8080
+# open daarna http://localhost:8080 op het scherm</code></pre>
+        <p>Whitelist vervolgens <code>http://localhost:8080</code> (of het IP) in §4. De SDK levert ook <code>demo/server.js</code> mee (<code>node demo/server.js</code>) die de repo én een nep-API serveert.</p>
+
+        <h2 id="checklist">8. Beveiligingschecklist</h2>
+        <ul class="checklist">
+            <li>Aparte API-gebruiker, <strong>alleen leesrechten</strong>, beperkt tot de juiste producten.</li>
+            <li>Sterk, uniek wachtwoord; periodiek roteren.</li>
+            <li>Alleen de benodigde origins in de CORS-whitelist (geen <code>*</code>).</li>
+            <li>Geen beheeraccount in <code>config.js</code>.</li>
+            <li>Bij twijfel: zet een eigen reverse-proxy ertussen die de credentials server-side toevoegt, zodat ze niet in de HTML staan.</li>
+        </ul>
+    </div>
+
+    <footer>i-Reserve Narrow Casting SDK · <a href="../index.html">overzicht</a> · <a href="aan-de-slag.html">Aan de slag</a></footer>
+</body>
+</html>

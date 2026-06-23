@@ -1,0 +1,13 @@
+# Bronimplementaties van klanten (bevatten klantnamen + credentials) — niet committen
+_bronnen/
+
+# Hulpscript voor het kopiëren van de bronnen (lokaal)
+copy_bronnen.sh
+
+# OS / IDE
+.DS_Store
+.idea/
+
+# Ongebruikte assets uit de oude losse files (bevat o.a. een klantlogo) — niet committen
+images 2/
+fonts/
